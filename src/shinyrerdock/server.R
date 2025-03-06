@@ -14,14 +14,13 @@ server <- shinyServer(function(input, output, session) {
   
   observeEvent(input$run,{ #script to init server
     #usually where you'd load a csv or connect to a database
-    print(getwd())
     RERw <<- readRDS('/data/RERw.rds')
     trees <<- readRDS('/data/trees.rds')
     corrr <<- readRDS('/data/cor.rds')
     translate <<- read_csv('/data/alignment_species_translation.csv')
-    pheno <<- read.csv('/data/phenotype_vec.csv')
     
     #process some initial data to format everything right
+    pheno <<- read.csv('/data/phenotype_vec.csv')
     colnames(pheno) <<- c('latest_assembly','temp')
     phvals <<- t(pheno$temp)
     names(phvals) <<- pheno$latest_assembly
@@ -73,15 +72,26 @@ server <- shinyServer(function(input, output, session) {
       tgene <- ggtree(ttemp)
       meta_gene <- tgene$data %>%
         dplyr::inner_join(tmeta, c('label' = 'latest_assembly'))
-      tgene <- tgene +
-        geom_point(data = meta_gene,
-                   aes(x = x,
+      
+      avgsum <- sum(meta_avg$branch.length)
+      genesum <- sum(meta_gene$branch.length)
+      meta_gene <- meta_gene %>% 
+                  left_join(meta_avg %>% select(label, branch2=branch.length), by='label') %>% 
+                  mutate(diff = branch.length/genesum-branch2/avgsum)
+      
+      tgene <- tgene %<+% meta_gene +
+        aes(color=diff)+
+        geom_point(aes(x = x,
                        y = y,
                        species = species, 
-                       Tb = temp))
+                       Tb = temp)) +
+        scale_color_gradientn(colours = c('blue','grey','red'))+
+        guides(color='none')
+        
       
       t1 <-plotly::ggplotly(tavg, tooltip=c('species','Tb')) 
-      t2 <-plotly::ggplotly(tgene, tooltip=c('species','Tb'))  
+      t2 <-plotly::ggplotly(tgene, tooltip=c('species','Tb')) 
+      
       
       plotly::subplot(t1, t2) %>% 
         layout(annotations = list(
@@ -140,5 +150,3 @@ server <- shinyServer(function(input, output, session) {
   })
   
 })
-
-

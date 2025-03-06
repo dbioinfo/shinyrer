@@ -10,7 +10,7 @@ FROM rocker/shiny-verse:latest
   COPY ["src/shinyrerdock/server.R", "/src/shiny/server.R"]
 
   ## install libs
-  RUN apt-get update && apt-get install -y vim libssl3 lsof htop libglpk40
+  RUN apt-get update && apt-get install -y vim libssl3 lsof htop libglpk40 #xdg-utils
   RUN ["R", "-e", "devtools::install_github('nclark-lab/RERconverge')"]
   RUN ["R", "-e", "install.packages(c('shinyjs','shinythemes','plotly','rclipboard','DT','BiocManager'), dependencies=TRUE)"]
   RUN ["R", "-e", "BiocManager::install('ggtree')"]
@@ -27,9 +27,12 @@ FROM rocker/shiny-verse:latest
   RUN cat /src/shiny/ui.R /src/shiny/server.R > /srv/shiny-server/shinyrer/app.R
   RUN echo "\nshinyApp(ui = ui, server = server)" >> /srv/shiny-server/shinyrer/app.R
 
+  #welcome message
+  RUN echo '\necho "Welcome to the shinyRER container!\n"' >> /root/.bashrc
+
   #show port to host
   EXPOSE 3838
 
   ## run the server ...
   #CMD is the command that starts the service when container runs
-  CMD /usr/bin/shiny-server
+  CMD ["/usr/bin/shiny-server"]
