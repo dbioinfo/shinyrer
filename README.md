@@ -1,4 +1,4 @@
-##Welcome to shinyRER
+## Welcome to shinyRER
 ![](figs/promopic.png)
 The shinyRER package was built to display the results of an RERConverge analysis. RERConverge correlates relative evolutionary rates of individual genes to a phenotype. Genes with a high rho correlation are ones whose evolution best correlates with the supplied phenotype. For each gene, a phylogenetic tree is constructed whose relative branch lengths to the average tree signal particular species with an accelerated or diminished evolutionary rate. The results of these analyses are contained in `shipping_container.zip` and are displayed in the web-based interactive shiny dashboard.  
 
